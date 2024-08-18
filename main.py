@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service 
 from selenium.webdriver.common.by import By
@@ -12,8 +13,11 @@ import requests
 import PIL.Image
 from playsound import playsound
 import sys
-
 import re
+
+
+name = sys.argv[1]
+password = sys.argv[2]
 
 def appointment_page_check(url):
   
@@ -23,7 +27,7 @@ def appointment_page_check(url):
 def find_available_dates(driver):
   
     #print("in-function")
-    holiday_elements = holiday_elements = driver.find_elements(By.XPATH, "//td[@title='Available']")
+    holiday_elements = driver.find_elements(By.XPATH, "//td[@title='Available']")
   
     #print("out-function")
 
@@ -31,13 +35,11 @@ def find_available_dates(driver):
 
 def navigate_and_find_dates(driver):
   
-  for _ in range(36):# Add how many months you want to scan here----------------------------------------------------
-
+  for _ in range(36):
     holiday_dates = find_available_dates(driver)
     
-
     if holiday_dates:
-        playsound.playsound("/home/anonymousje/Downloads/codes/selenium/alarm.mp3")
+        playsound.playsound("/home/anonymousje/Downloads/codes/selenium/alarm.mp3")  
         print("Sound played for holiday:", holiday)
         sys.exit()
 
@@ -45,7 +47,6 @@ def navigate_and_find_dates(driver):
       holiday_date = holiday.get_attribute("data-date")
       holiday_title = holiday.get_attribute("title")
       print(f"Holiday: {holiday_title} on {holiday_date}")
-
 
     try:
       next_button = WebDriverWait(driver, 20).until(
@@ -73,10 +74,10 @@ def login(driver):
         EC.presence_of_element_located((By.CLASS_NAME, "form-control"))
     )
     username_input = driver.find_element(By.CLASS_NAME, "form-control")
-    username_input.send_keys("example@gmail.com") #Add Username Here---------------------------------------------------
+    username_input.send_keys(name)
 
     password_input = driver.find_element(By.NAME, "login_password")
-    password_input.send_keys("Password") #Add Password here------------------------------------------------------------
+    password_input.send_keys(password)
 
     tag_element = driver.find_element(By.ID, "Imageid")
     src_value = tag_element.get_attribute("src")
@@ -88,7 +89,7 @@ def login(driver):
 
     img = PIL.Image.open("downloaded_image.jpg")
     #print(src_value)
-    os.environ["GEMINI_API_KEY"] = "" #Add API KEY HERE
+    os.environ["GEMINI_API_KEY"] = "AIzaSyBInq8zdbnYmpRhstpRDq0WbbQhFFf57y8"
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(img)
@@ -106,9 +107,9 @@ def login(driver):
         os.remove(image_path)
         print("Image deleted successfully.")
 def route_to_page(driver):
-    driver.get("https://blsitalypakistan.com/")
+    #driver.get("https://blsitalypakistan.com/")
     login(driver)
-    time.sleep(5)
+    #time.sleep(5)
     while driver.current_url == "https://blsitalypakistan.com/account/login":
         login(driver)
         #sleep(5)
@@ -120,42 +121,45 @@ def route_to_page(driver):
     #close_button = driver.find_element(By.CLASS_NAME, "cl")
     #close_button.click()
 
-    try:
+    #try:
     
-        close_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "cl"))
-        )
-        close_button.click()
-        print("Popup closed successfully!")
-    except:
-        print("No popup found.")
+     #   close_button = WebDriverWait(driver, 10).until(
+      #      EC.presence_of_element_located((By.CLASS_NAME, "cl"))
+       # )
+        #close_button.click()
+        #print("Popup closed successfully!")
+
+    #except:
+     #   print("No popup found.")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valCenterLocationId"))
     )
     dropdown_element_location = driver.find_element(By.ID, "valCenterLocationId")
     select_object_location = Select(dropdown_element_location)
-    select_object_location.select_by_visible_text("Lahore (Pakistan)") #Add City Here-----------------------------------------
+    select_object_location.select_by_visible_text("Lahore (Pakistan)")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valCenterLocationTypeId"))
     )
     dropdown_element_type = driver.find_element(By.ID, "valCenterLocationTypeId")
     select_object_type = Select(dropdown_element_type)
-    select_object_type.select_by_visible_text("National - Work")#Add Visa Type Here---------------------------------------------------
+    select_object_type.select_by_visible_text("National - Work")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valAppointmentForMembers"))
     )
+
     dropdown_element_applicant = driver.find_element(By.ID, "valAppointmentForMembers")
     select_object_applicant = Select(dropdown_element_applicant)
-    select_object_applicant.select_by_visible_text("Individual") #Add Applicant type here-------------------------------------------
+    select_object_applicant.select_by_visible_text("Individual")
 
 
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valAppointmentDate"))
     )
+    
     date_input = driver.find_element(By.ID, "valAppointmentDate")
     date_input.click()
 
