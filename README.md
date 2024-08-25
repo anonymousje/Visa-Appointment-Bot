@@ -65,7 +65,7 @@ pip install selenium requests PIL playsound google-generativeai
 2. Open a command prompt in that folder and run this command:
 
 ```bash
-python main.py
+python interface.py
 ```
 
           
