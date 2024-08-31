@@ -38,10 +38,9 @@ class Ui_BLS(object):
         while(1):
             argument1 = self.lineEdit.text()
             argument2 = self.lineEdit_2.text()
-            arguments = ["/home/anonymousje/Downloads/codes/selenium/main.py", argument1, argument2]
+            arguments = ["main.exe", argument1, argument2]
+            print("[INFO] Arguments:", arguments)
             subprocess.run(arguments)
-            #subprocess("python", "main.py", self.lineEdit.text(), self.lineEdit_2.text())
-
 
     def retranslateUi(self, BLS):
         _translate = QtCore.QCoreApplication.translate

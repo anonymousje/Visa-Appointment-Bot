@@ -27,11 +27,20 @@ def appointment_page_check(url):
 def find_available_dates(driver):
   
     #print("in-function")
-    holiday_elements = driver.find_elements(By.XPATH, "//td[@title='Available']")
+    #holiday_elements = driver.find_elements(By.XPATH, "//td[@title='Available']")
+    Possible_holiday_elements = driver.find_elements(By.XPATH, "//td")  # Find all <td> elements
+    available_dates = []
+    for element in Possible_holiday_elements:
+        title = element.get_attribute("title")
+        if title not in ["Not Available","Slots Full", "Holiday"]:
+            available_dates.append(element.text)  # Add the available date to the list
   
     #print("out-function")
 
-    return holiday_elements
+    return available_dates
+    #print("out-function")
+
+    # return holiday_elements
 
 def navigate_and_find_dates(driver):
   
@@ -39,8 +48,8 @@ def navigate_and_find_dates(driver):
     holiday_dates = find_available_dates(driver)
     
     if holiday_dates:
-        playsound.playsound("/home/anonymousje/Downloads/codes/selenium/alarm.mp3")  
-        print("Sound played for holiday:", holiday)
+        playsound("alarm.mp3")  
+        time.sleep(10000)
         sys.exit()
 
     for holiday in holiday_dates:
@@ -107,44 +116,43 @@ def login(driver):
         os.remove(image_path)
         print("Image deleted successfully.")
 def route_to_page(driver):
-    #driver.get("https://blsitalypakistan.com/")
+    driver.get("https://blsitalypakistan.com/")
     login(driver)
     #time.sleep(5)
     while driver.current_url == "https://blsitalypakistan.com/account/login":
         login(driver)
         #sleep(5)
 
-
     driver.get("https://blsitalypakistan.com/bls_appmnt/bls-italy-appointment")
 
 
-    #close_button = driver.find_element(By.CLASS_NAME, "cl")
-    #close_button.click()
+    close_button = driver.find_element(By.CLASS_NAME, "cl")
+    close_button.click()
 
-    #try:
+    try:
     
-     #   close_button = WebDriverWait(driver, 10).until(
-      #      EC.presence_of_element_located((By.CLASS_NAME, "cl"))
-       # )
-        #close_button.click()
-        #print("Popup closed successfully!")
+        close_button = WebDriverWait(driver, 10).until(
+           EC.presence_of_element_located((By.CLASS_NAME, "cl"))
+        )
+        close_button.click()    
+        print("Popup closed successfully!")
 
-    #except:
-     #   print("No popup found.")
+    except:
+       print("No popup found.")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valCenterLocationId"))
     )
     dropdown_element_location = driver.find_element(By.ID, "valCenterLocationId")
     select_object_location = Select(dropdown_element_location)
-    select_object_location.select_by_visible_text("Lahore (Pakistan)")
+    select_object_location.select_by_visible_text("Islamabad (Pakistan)")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valCenterLocationTypeId"))
     )
     dropdown_element_type = driver.find_element(By.ID, "valCenterLocationTypeId")
     select_object_type = Select(dropdown_element_type)
-    select_object_type.select_by_visible_text("National - Work")
+    select_object_type.select_by_visible_text("National - Study")
 
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "valAppointmentForMembers"))
@@ -168,10 +176,9 @@ def route_to_page(driver):
     )
 
 
-
 def main():
 
-    service = Service(executable_path = "/home/anonymousje/Downloads/codes/selenium/chromedriver")
+    service = Service(executable_path = "chromedriver.exe")
     driver = webdriver.Chrome(service=service)
     route_to_page(driver)
 
@@ -201,20 +208,20 @@ def main():
         )
         
         navigate_and_find_dates(driver)
-        #print("end process")
+        print("end process")
         #time.sleep(20)
         driver.refresh()
         
 
 
-    #driver.quit()
+    driver.quit()
 
-    #holiday_dates = find_available_dates(driver)
+    holiday_dates = find_available_dates(driver)
 
-    #for holiday in holiday_dates:
-    #    holiday_date = holiday.get_attribute("data-date")
-    #    holiday_title = holiday.get_attribute("title")
-    #    print(f"Holiday: {holiday_title} on {holiday_date}")
+    for holiday in holiday_dates:
+       holiday_date = holiday.get_attribute("data-date")
+       holiday_title = holiday.get_attribute("title")
+       print(f"Holiday: {holiday_title} on {holiday_date}")
 
 if __name__ == "__main__":
   main()
