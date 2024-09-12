@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import os
 import google.generativeai as genai
 import time
@@ -31,14 +31,44 @@ def find_available_dates(driver):
   
     return available_dates
 
-def navigate_and_find_dates(driver):
+def navigate_and_find_dates(driver, passport):
   
   for _ in range(2):
     holiday_dates = find_available_dates(driver)
     
     if holiday_dates:
+        
+        date_element = WebDriverWait(driver, 60).until(
+        EC.element_to_be_clickable((By.XPATH, f"//td[text()='{holiday_dates[0]}']"))
+)
+        date_element.click()
+
+        WebDriverWait(driver, 60).until(
+                    EC.presence_of_element_located((By.ID, "valAppointmentType"))
+                )
+        #dropdown_element_type = driver.find_element(By.ID, "valAppointmentType")
+        dropdown_element = WebDriverWait(driver,60).until(EC.presence_of_element_located((By.ID, 'valAppointmentType')))
+        select_object_type = Select(dropdown_element)
+        try:
+          select_object_type.select_by_value  ('normal')
+        except NoSuchElementException:
+          print("balls")
+          time.sleep(5)
+          first_option = select_object_type.options[1]
+          first_option.click()
+
+        time.sleep(2)
         playsound(resource_path("sound.mp3"))  
         print("DATE AVAILABLE!")
+        WebDriverWait(driver, 60).until(
+                    EC.element_to_be_clickable((By.NAME, "valApplicant[1][passport_number]"))
+                )
+        
+        input_element = driver.find_element(By.NAME, "valApplicant[1][passport_number]")
+        driver.execute_script("arguments[0].removeAttribute('readonly'); arguments[0].value = '';", input_element);
+
+# Now you can edit the input field
+        input_element.send_keys(passport)
         time.sleep(10000)
         sys.exit()
 
@@ -56,7 +86,7 @@ def navigate_and_find_dates(driver):
       print("No next button found, assuming reached last month")
       break
 
-def main(link):
+def main(link, passport):
    
     print("📄 [INFO] Driver Script Running On Link:", link)
     driver_path = resource_path("chromedriver.exe")
@@ -71,7 +101,11 @@ def main(link):
       input("Press any key to exit...")
       exit()
 
-    driver.get(link)
+    time.sleep(100)
+    try:
+      driver.get(link)
+    except TimeoutException:
+       driver.get(link)
 
     time.sleep(10)
 
@@ -82,14 +116,14 @@ def main(link):
                 )
             dropdown_element_type = driver.find_element(By.ID, "valCenterLocationId")
             select_object_type = Select(dropdown_element_type)
-            select_object_type.select_by_visible_text("Manila (PHILIPPINES)")
+            select_object_type.select_by_visible_text("Cebu (PHILIPPINES)")
 
             WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.ID, "valCenterLocationTypeId"))
                 )
             dropdown_element_type = driver.find_element(By.ID, "valCenterLocationTypeId")
             select_object_type = Select(dropdown_element_type)
-            select_object_type.select_by_visible_text("National Visa Work")
+            select_object_type.select_by_visible_text("National Visa Others")
 
 
             WebDriverWait(driver, 60).until(
@@ -108,7 +142,7 @@ def main(link):
             date_input = driver.find_element(By.ID, "valAppointmentDate")
             date_input.click()
 
-            navigate_and_find_dates(driver)
+            navigate_and_find_dates(driver, passport)
             driver.refresh()
         except TimeoutException:
             driver.refresh()
@@ -116,4 +150,6 @@ def main(link):
 
 if __name__ == "__main__":
   link = sys.argv[1]
-  main(link)
+  #passport = sys.arg[2]
+  passport = "ZB654321"
+  main(link,passport)
