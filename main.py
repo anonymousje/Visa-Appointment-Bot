@@ -98,7 +98,7 @@ def login(driver):
 
     img = PIL.Image.open("downloaded_image.jpg")
     #print(src_value)
-    os.environ["GEMINI_API_KEY"] = "AIzaSyBInq8zdbnYmpRhstpRDq0WbbQhFFf57y8"
+    os.environ["GEMINI_API_KEY"] = ""
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(img)
